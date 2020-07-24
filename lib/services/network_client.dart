@@ -16,14 +16,19 @@ class NetworkClient {
   NetworkClient._internal();
 
   static Future<Result<List<Album>>> getAlbums() async {
-    List<dynamic> data = await makeBaseCall(url: Url.ALBUMS, queryParams: null);
+    List<dynamic> data = await makeBaseCall(url: Url.ALBUMS);
     List<Album> albums = data.map((e) => Album.fromJson(e)).toList();
     print(albums);
     return Result.success(albums);
   }
 
-  static Future<Result<List<Photo>>> getPhotosForAlbum(int albumId) async {
-    Map<String, String> queryParams = {Param.ALBUM_ID: albumId.toString()};
+  static Future<Result<List<Photo>>> getPhotosForAlbum(
+      {int albumId, int pageNum}) async {
+    Map<String, String> queryParams = {
+      Param.ALBUM_ID: albumId.toString(),
+      Param.START: pageNum.toString(),
+      Param.LIMIT: 10.toString()
+    };
 
     List<dynamic> data =
         await makeBaseCall(url: Url.PHOTOS, queryParams: queryParams);
@@ -36,7 +41,7 @@ class NetworkClient {
       {String url, Map<String, String> queryParams}) async {
     String baseUrl = getBaseUrl();
 
-    var uri = Uri.https(baseUrl, url);
+    var uri = Uri.https(baseUrl, url, queryParams);
     print("API CALL: ${uri.toString()}");
 
     http.Response response = await http.get(
