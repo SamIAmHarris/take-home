@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:t3_demo/base/mvp.dart';
 import 'package:t3_demo/feature/photo_details/photo_detail_arguments.dart';
 import 'package:t3_demo/feature/photos/photos_contract.dart';
 import 'package:t3_demo/feature/photos/photos_presenter.dart';
@@ -22,7 +23,7 @@ class _PhotosPageState extends State<PhotosPage> implements PhotosView {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
   ScrollController _scrollController = ScrollController();
   PhotosPresenter photosPresenter;
-  bool isLoading = false;
+  ScreenState screenState = ScreenState.LOADING;
   bool isLoadingMoreItems = false;
   List<Photo> photos = [];
   final albumId;
@@ -31,17 +32,19 @@ class _PhotosPageState extends State<PhotosPage> implements PhotosView {
     photosPresenter = PhotosPresenterImpl(photosView: this, albumId: albumId);
   }
 
+  void _handleScrollHitBottom() {
+    if (!isLoadingMoreItems) {
+      photosPresenter.retrieveMorePhotos();
+    }
+  }
+
   @override
   void initState() {
     super.initState();
     _scrollController.addListener(() {
       if (_scrollController.position.maxScrollExtent ==
           _scrollController.position.pixels) {
-        if (!isLoadingMoreItems) {
-          print("LOADING MORE PHOTOS");
-          photosPresenter.increasePageCount(1);
-          photosPresenter.retrievePhotos(loadingMoreItems: true);
-        }
+        _handleScrollHitBottom();
       }
     });
 
@@ -58,98 +61,85 @@ class _PhotosPageState extends State<PhotosPage> implements PhotosView {
   }
 
   Widget _getMainContent() {
-    if (isLoading) {
-      return Center(
-        child: SizedBox(
-          height: 50.0,
-          width: 50.0,
-          child: CircularProgressIndicator(
-            valueColor: AlwaysStoppedAnimation<Color>(Colors.red),
-            strokeWidth: 5.0,
-          ),
-        ),
-      );
-    } else {
-      return ListView.builder(
-          controller: _scrollController,
-          itemCount: photos.length,
-          itemBuilder: (BuildContext context, int index) {
-            return _buildListItem(photos[index]);
-          });
+    switch (screenState) {
+      case ScreenState.LOADING:
+        return T3Widget.STANDARD_PROGRESS;
+      case ScreenState.ERROR:
+        return T3Widget.getRetryWidget(() {
+          photosPresenter.retrieveInitialPhotos();
+        });
+      case ScreenState.CONTENT:
+      default:
+        return ListView.builder(
+            controller: _scrollController,
+            itemCount: photos.length,
+            itemBuilder: (BuildContext context, int index) {
+              return _getPhotoCard(photos[index]);
+            });
     }
   }
 
   Widget _getAppBar() => Platform.isIOS
-      ? CupertinoNavigationBar(previousPageTitle: "Albums",)
-      : AppBar(title: Text("Album Photos"));
-
-  Widget _buildListItem(Photo photo) {
-    return GestureDetector(
-        onTap: () {
-          navigateToPhotoDetails(photo);
-        },
-        child: _getPhotoCard(photo));
-  }
+      ? CupertinoNavigationBar(
+          previousPageTitle: Strings.ALBUMS,
+        )
+      : AppBar(title: Text(Strings.ALBUM_PHOTOS));
 
   Widget _getPhotoCard(Photo photo) {
     return Card(
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          SizedBox(
-            height: Num.THUMBNAIL_SIZE,
-            width: Num.THUMBNAIL_SIZE,
-            child: Center(
-              child: FadeInImage.memoryNetwork(
-                placeholder: kTransparentImage,
-                image: photo.thumbnailUrl,
+      child: InkWell(
+        onTap: () {
+          navigateToPhotoDetails(photo);
+        },
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            _getThumbnailWidget(photo),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(Num.STANDARD_PADDING),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    _getMetaDataText(
+                      photo.title,
+                    ),
+                    _getMetaDataText(
+                      "${Strings.ID} : ${photo.id}",
+                    ),
+                    _getMetaDataText(
+                      "${Strings.ALBUM_ID} : ${photo.albumId}",
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ),
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Text(
-                    "${photo.title}",
-                    softWrap: true,
-                    overflow: TextOverflow.visible,
-                    textAlign: TextAlign.center,
-                  ),
-                  Text(
-                    "${photo.albumId}",
-                    softWrap: true,
-                    overflow: TextOverflow.visible,
-                    textAlign: TextAlign.center,
-                  ),
-                  Text(
-                    "${photo.id}",
-                    softWrap: true,
-                    overflow: TextOverflow.visible,
-                    textAlign: TextAlign.center,
-                  ),
-                ],
-              ),
-            ),
-          )
-        ],
+            )
+          ],
+        ),
       ),
     );
   }
+
+  Widget _getMetaDataText(String title) => Text(
+        title,
+        textAlign: TextAlign.center,
+      );
+
+  Widget _getThumbnailWidget(Photo photo) => SizedBox(
+        height: Num.THUMBNAIL_SIZE,
+        width: Num.THUMBNAIL_SIZE,
+        child: Center(
+          child: FadeInImage.memoryNetwork(
+            placeholder: kTransparentImage,
+            image: photo.thumbnailUrl,
+          ),
+        ),
+      );
 
   @override
   void showException(String exceptionMessage) {
     final snackBar = SnackBar(content: Text(exceptionMessage));
     _scaffoldKey.currentState.showSnackBar(snackBar);
-  }
-
-  @override
-  void showLoading(bool isLoading) {
-    setState(() {
-      this.isLoading = isLoading;
-    });
   }
 
   @override
@@ -178,6 +168,13 @@ class _PhotosPageState extends State<PhotosPage> implements PhotosView {
   void loadingMoreItems(bool isLoadingMoreItems) {
     setState(() {
       this.isLoadingMoreItems = isLoadingMoreItems;
+    });
+  }
+
+  @override
+  void setScreenState(ScreenState screenState) {
+    setState(() {
+      this.screenState = screenState;
     });
   }
 }

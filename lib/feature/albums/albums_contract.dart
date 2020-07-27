@@ -6,7 +6,7 @@ abstract class AlbumsPresenter implements BasePresenter {
 }
 
 abstract class AlbumsView implements BaseView<AlbumsPresenter> {
-  void showLoading(bool isLoading);
+  void setScreenState(ScreenState screenState);
 
   void showException(String exceptionMessage);
 

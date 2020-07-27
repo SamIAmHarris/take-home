@@ -1,12 +1,9 @@
-import 'dart:io';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:t3_demo/feature/photo_details/photo_details_contract.dart';
 import 'package:t3_demo/feature/photo_details/photo_details_presenter.dart';
 import 'package:t3_demo/model/photo.dart';
 import 'package:t3_demo/util/constants.dart';
-import 'package:transparent_image/transparent_image.dart';
 
 class PhotoDetailsPage extends StatefulWidget {
   final Photo photo;
@@ -20,7 +17,7 @@ class PhotoDetailsPage extends StatefulWidget {
 class _PhotoDetailsPageState extends State<PhotoDetailsPage>
     implements PhotoDetailsView {
   PhotoDetailsPresenter photoDetailsPresenter;
-  final Photo photo;
+  Photo photo;
 
   _PhotoDetailsPageState(this.photo) {
     photoDetailsPresenter =
@@ -46,27 +43,17 @@ class _PhotoDetailsPageState extends State<PhotoDetailsPage>
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            SizedBox(
-              child: Center(
-                child: FadeInImage.assetNetwork(
-                  placeholder: "assets/placeholder_image.png",
-                  image: photo.url,
-                ),
-              ),
-            ),
-            Padding(
+            _getFullSizePhotoWidget(),
+            _getMetadataText(
               padding: const EdgeInsets.fromLTRB(8.0, 16.0, 8.0, 2.0),
-              child: Text("Id: ${photo.id}"),
+              title: "${Strings.TITLE}: ${photo.title}",
             ),
-            Padding(
-              padding:
-              const EdgeInsets.symmetric(vertical: 2.0, horizontal: 8.0),
-              child: Text("Album Id: ${photo.albumId}"),
-            ),
-            Padding(
-              padding:
-              const EdgeInsets.symmetric(vertical: 2.0, horizontal: 8.0),
-              child: Text("Title: ${photo.title}"),
+            _getMetadataText(
+                padding: Styles.kStandardRowParams,
+                title: "${Strings.ALBUM_ID}: ${photo.albumId}"),
+            _getMetadataText(
+              padding: Styles.kStandardRowParams,
+              title: "${Strings.ID}: ${photo.id}",
             )
           ],
         ),
@@ -74,13 +61,22 @@ class _PhotoDetailsPageState extends State<PhotoDetailsPage>
     );
   }
 
-  @override
-  void navigateToTheAppWithinTheApp() {
-    //todo: I want to navigate to the app hosted on the web. Appception.
-  }
+  Widget _getFullSizePhotoWidget() => SizedBox(
+        child: Center(
+          child: FadeInImage.assetNetwork(
+            placeholder: Asset.PLACEHOLDER_LOCATION,
+            image: photo.url,
+          ),
+        ),
+      );
+
+  Widget _getMetadataText({String title, EdgeInsets padding}) =>
+      Padding(padding: padding, child: Text(title));
 
   @override
   void initPhotoDetails(Photo photo) {
-    // TODO: implement initPhotoDetails
+    setState(() {
+      this.photo = photo;
+    });
   }
 }

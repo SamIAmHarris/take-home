@@ -1,3 +1,4 @@
+import 'package:t3_demo/base/mvp.dart';
 import 'package:t3_demo/feature/photos/photos_contract.dart';
 import 'package:t3_demo/model/photo.dart';
 import 'package:t3_demo/services/network_client.dart';
@@ -6,7 +7,7 @@ import 'package:t3_demo/util/constants.dart';
 
 class PhotosPresenterImpl implements PhotosPresenter {
   final PhotosView photosView;
-  int albumId;
+  final int albumId;
   int currentPage = 0;
   List<Photo> loadedPhotos = [];
 
@@ -14,44 +15,57 @@ class PhotosPresenterImpl implements PhotosPresenter {
 
   @override
   init() {
-    retrievePhotos();
+    retrieveInitialPhotos();
   }
 
+  //Initially I had these 2 methods combined into one with bool to indicate loading more.
+  //Decided it is cleaner to keep them separate since loading more never changes screen state.
   @override
-  Future<void> retrievePhotos({bool loadingMoreItems = false}) async {
-    if (currentPage >= Num.MAX_PHOTOS_PER_ALBUM) {
-      return;
-    }
-
+  Future<void> retrieveInitialPhotos() async {
     try {
-      if (loadingMoreItems) {
-        photosView.loadingMoreItems(true);
-        photosView.showLoadingMoreItemsAlert();
-      } else {
-        photosView.showLoading(true);
-      }
+      photosView.setScreenState(ScreenState.LOADING);
 
-      Result<List<Photo>> photosResult = await NetworkClient.getPhotosForAlbum(
-          albumId: albumId, pageNum: currentPage * 10);
+      Result<List<Photo>> photosResult =
+          await NetworkClient.getPhotosForAlbum(albumId: albumId, pageNum: 0);
 
       if (photosResult.status == Status.SUCCESS) {
-        photosView.loadingMoreItems(false);
-        photosView.showLoading(false);
         loadedPhotos.addAll(photosResult.data);
         photosView.setPhotos(loadedPhotos);
+        photosView.setScreenState(ScreenState.CONTENT);
       } else {
-        photosView.loadingMoreItems(false);
-        photosView.showLoading(false);
+        photosView.setScreenState(ScreenState.ERROR);
         photosView.showException(photosResult.message);
       }
     } catch (e) {
       photosView.loadingMoreItems(false);
-      photosView.showLoading(false);
+      photosView.showException(Strings.DEFAULT_ERROR_MESSAGE);
     }
   }
 
   @override
-  void increasePageCount(int increaseByNum) {
-    currentPage += increaseByNum;
+  Future<void> retrieveMorePhotos() async {
+    if (currentPage >= Num.MAX_PHOTOS_PER_ALBUM) {
+      return;
+    }
+
+    photosView.loadingMoreItems(true);
+    photosView.showLoadingMoreItemsAlert();
+
+    try {
+      Result<List<Photo>> photosResult = await NetworkClient.getPhotosForAlbum(
+          albumId: albumId, pageNum: (currentPage + 1) * Num.PHOTOS_PER_PAGE);
+
+      photosView.loadingMoreItems(false);
+      if (photosResult.status == Status.SUCCESS) {
+        currentPage++;
+        loadedPhotos.addAll(photosResult.data);
+        photosView.setPhotos(loadedPhotos);
+      } else {
+        photosView.showException(photosResult.message);
+      }
+    } catch (e) {
+      photosView.loadingMoreItems(false);
+      photosView.showException(Strings.DEFAULT_ERROR_MESSAGE);
+    }
   }
 }

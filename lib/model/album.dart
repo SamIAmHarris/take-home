@@ -2,7 +2,6 @@ import 'package:json_annotation/json_annotation.dart';
 
 part 'album.g.dart';
 
-//todo add several other fields. Not needed for V1.
 @JsonSerializable()
 class Album {
   final int userId;

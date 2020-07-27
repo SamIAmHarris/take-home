@@ -2,13 +2,13 @@ import 'package:t3_demo/base/mvp.dart';
 import 'package:t3_demo/model/photo.dart';
 
 abstract class PhotosPresenter implements BasePresenter {
-  Future<void> retrievePhotos({bool loadingMoreItems = false});
+  Future<void> retrieveMorePhotos();
 
-  void increasePageCount(int increaseByNum);
+  Future<void> retrieveInitialPhotos();
 }
 
 abstract class PhotosView implements BaseView<PhotosPresenter> {
-  void showLoading(bool isLoading);
+  void setScreenState(ScreenState screenState);
 
   void showLoadingMoreItemsAlert();
 

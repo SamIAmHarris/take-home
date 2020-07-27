@@ -4,17 +4,24 @@ import 'package:flutter/material.dart';
 class Url {
   static const ALBUMS = "/albums";
   static const PHOTOS = "/photos";
+  static const BASE_URL = "jsonplaceholder.typicode.com";
+}
 
-  //THEY ARE THE SAME SAM, WHY DID YOU DO THIS? BECAUSE THERE IS SOMETHING WRONG WITH ME.
-  static const BASE_DEV_URL = "jsonplaceholder.typicode.com";
-  static const BASE_PROD_URL = "jsonplaceholder.typicode.com";
+class Asset {
+  static const PLACEHOLDER_LOCATION = "assets/placeholder_image.png";
 }
 
 class Strings {
   static const String DEFAULT_ERROR_MESSAGE =
       "Something went wrong, please try again";
-  static const String DEFAULT_ALBUM_TITLE = "Jeff, did you read all the code?";
-  static const String LOADING_MORE_PHOTOS = "Jeff, we are loading more photos for you...";
+  static const String DEFAULT_ALBUM_TITLE = "No title found";
+  static const String LOADING_MORE_PHOTOS = "Loading more photos...";
+  static const String ALBUM_ID = "Album Id";
+  static const String ID = "Id";
+  static const String ALBUMS = "Albums";
+  static const String ALBUM_PHOTOS = "Album Photos";
+  static const String TITLE = "Title";
+  static const String RETRY = "Retry";
 }
 
 class Param {
@@ -33,6 +40,8 @@ class T3Route {
 class Styles {
   static const kCardAlbumStyle = TextStyle(
       fontSize: 20.0, fontWeight: FontWeight.bold, color: Colors.black87);
+  static const kStandardRowParams =
+      EdgeInsets.symmetric(vertical: 2.0, horizontal: 8.0);
 }
 
 class Num {
@@ -40,4 +49,31 @@ class Num {
   static const THUMBNAIL_SIZE = 150.0;
   static const FULL_SIZE = 600.0;
   static const QUICK_SNACKBAR = 1500;
+  static const STANDARD_PROGRESS = 50.0;
+  static const STANDARD_PROGRESS_STROKE = 5.0;
+  static const STANDARD_PADDING = 8.0;
+  static const PORTRAIT_ALBUM_COLUMN = 2;
+  static const PHOTOS_PER_PAGE = 10;
+}
+
+class T3Widget {
+  static const STANDARD_PROGRESS = Center(
+    child: SizedBox(
+      height: Num.STANDARD_PROGRESS,
+      width: Num.STANDARD_PROGRESS,
+      child: CircularProgressIndicator(
+        valueColor: AlwaysStoppedAnimation<Color>(Colors.red),
+        strokeWidth: Num.STANDARD_PROGRESS_STROKE,
+      ),
+    ),
+  );
+
+  static Widget getRetryWidget(Function onPressed) {
+    return Center(
+      child: MaterialButton(
+          padding: EdgeInsets.all(24.0),
+          child: Text(Strings.RETRY),
+          onPressed: onPressed),
+    );
+  }
 }
