@@ -1,5 +1,4 @@
 import 'package:t3_demo/feature/photo_details/photo_details_contract.dart';
-import 'package:t3_demo/feature/photos/photos_contract.dart';
 import 'package:t3_demo/model/photo.dart';
 
 class PhotoDetailsPresenterImpl implements PhotoDetailsPresenter {

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:t3_demo/base/mvp.dart';
 import 'package:t3_demo/feature/albums/albums_contract.dart';
 import 'package:t3_demo/feature/albums/albums_presenter.dart';
 import 'package:t3_demo/feature/photos/photos_arguments.dart';
@@ -13,7 +14,7 @@ class AlbumsPage extends StatefulWidget {
 class _AlbumsPageState extends State<AlbumsPage> implements AlbumsView {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
   AlbumsPresenter albumsPresenter;
-  bool isLoading = false;
+  ScreenState screenState = ScreenState.LOADING;
   bool isLoadingMoreItems = false;
   List<Album> albums = [];
 
@@ -30,52 +31,44 @@ class _AlbumsPageState extends State<AlbumsPage> implements AlbumsView {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: _scaffoldKey,
       body: _getMainContent(),
     );
   }
 
   Widget _getMainContent() {
-    if (isLoading) {
-      return Center(
-        child: SizedBox(
-          height: 50.0,
-          width: 50.0,
-          child: CircularProgressIndicator(
-            valueColor: AlwaysStoppedAnimation<Color>(Colors.red),
-            strokeWidth: 5.0,
-          ),
-        ),
-      );
-    } else {
-      return GridView.builder(
-          itemCount: albums.length,
-          gridDelegate:
-              SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2),
-          itemBuilder: (BuildContext context, int index) {
-            return _buildGridItem(albums[index]);
-          });
+    switch (screenState) {
+      case ScreenState.LOADING:
+        return T3Widget.STANDARD_PROGRESS;
+      case ScreenState.ERROR:
+        return T3Widget.getRetryWidget(() {
+          albumsPresenter.retrieveAlbums();
+        });
+      case ScreenState.CONTENT:
+      default:
+        return GridView.builder(
+            itemCount: albums.length,
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: Num.PORTRAIT_ALBUM_COLUMN),
+            itemBuilder: (BuildContext context, int index) {
+              return _getAlbumCard(albums[index]);
+            });
     }
   }
 
-  Widget _buildGridItem(Album album) {
-    return GestureDetector(
+  Widget _getAlbumCard(Album album) {
+    return Card(
+      child: InkWell(
         onTap: () {
           navigateToPhotoDetailScreen(album.id);
         },
-        child: getAlbumCard(album));
-  }
-
-  Widget getAlbumCard(Album album) {
-    return Card(
-      child: Center(
-          child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Text(
+        child: Center(
+            child: Text(
           album.title ?? Strings.DEFAULT_ALBUM_TITLE,
           style: Styles.kCardAlbumStyle,
           textAlign: TextAlign.center,
-        ),
-      )),
+        )),
+      ),
     );
   }
 
@@ -99,9 +92,9 @@ class _AlbumsPageState extends State<AlbumsPage> implements AlbumsView {
   }
 
   @override
-  void showLoading(bool isLoading) {
+  void setScreenState(ScreenState screenState) {
     setState(() {
-      this.isLoading = isLoading;
+      this.screenState = screenState;
     });
   }
 }
