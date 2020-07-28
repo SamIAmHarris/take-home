@@ -1,37 +1,25 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:t3_demo/feature/photo_details/photo_details_contract.dart';
-import 'package:t3_demo/feature/photo_details/photo_details_presenter.dart';
+import 'package:provider/provider.dart';
+import 'package:t3_demo/bloc/photo_bloc.dart';
 import 'package:t3_demo/model/photo.dart';
 import 'package:t3_demo/util/constants.dart';
 
 class PhotoDetailsPage extends StatefulWidget {
-  final Photo photo;
-
-  PhotoDetailsPage(this.photo);
-
   @override
-  _PhotoDetailsPageState createState() => _PhotoDetailsPageState(photo);
+  _PhotoDetailsPageState createState() => _PhotoDetailsPageState();
 }
 
-class _PhotoDetailsPageState extends State<PhotoDetailsPage>
-    implements PhotoDetailsView {
-  PhotoDetailsPresenter photoDetailsPresenter;
+class _PhotoDetailsPageState extends State<PhotoDetailsPage> {
   Photo photo;
 
-  _PhotoDetailsPageState(this.photo) {
-    photoDetailsPresenter =
-        PhotoDetailsPresenterImpl(photoDetailsView: this, photo: photo);
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    photoDetailsPresenter.init();
-  }
+  _PhotoDetailsPageState() {}
 
   @override
   Widget build(BuildContext context) {
+    final PhotoBloc photoBloc = Provider.of<PhotoBloc>(context);
+    this.photo = photoBloc.photo;
+
     return Scaffold(
       body: _getMainContent(),
     );
@@ -72,11 +60,4 @@ class _PhotoDetailsPageState extends State<PhotoDetailsPage>
 
   Widget _getMetadataText({String title, EdgeInsets padding}) =>
       Padding(padding: padding, child: Text(title));
-
-  @override
-  void initPhotoDetails(Photo photo) {
-    setState(() {
-      this.photo = photo;
-    });
-  }
 }

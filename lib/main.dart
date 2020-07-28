@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:t3_demo/feature/albums/albums_page.dart';
-import 'package:t3_demo/feature/photo_details/photo_detail_arguments.dart';
 import 'package:t3_demo/feature/photo_details/photo_details_page.dart';
 import 'package:t3_demo/feature/photos/photos_page.dart';
 import 'package:t3_demo/util/constants.dart';
 
+import 'bloc/photo_bloc.dart';
 import 'feature/photos/photos_arguments.dart';
 
 void main() {
@@ -14,14 +15,16 @@ void main() {
 class App extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Hello Jeff',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-        visualDensity: VisualDensity.adaptivePlatformDensity,
-      ),
-      onGenerateRoute: generateRoute,
-    );
+    return ChangeNotifierProvider<PhotoBloc>.value(
+        value: PhotoBloc(),
+        child: MaterialApp(
+          title: 'Hello Jeff',
+          theme: ThemeData(
+            primarySwatch: Colors.blue,
+            visualDensity: VisualDensity.adaptivePlatformDensity,
+          ),
+          onGenerateRoute: generateRoute,
+        ));
   }
 
   static Route<dynamic> generateRoute(RouteSettings settings) {
@@ -33,8 +36,7 @@ class App extends StatelessWidget {
         final PhotosArguments args = settings.arguments;
         return MaterialPageRoute(builder: (_) => PhotosPage(args.albumId));
       case T3Route.PHOTO_DETAILS:
-        final PhotoDetailsArguments args = settings.arguments;
-        return MaterialPageRoute(builder: (_) => PhotoDetailsPage(args.photo));
+        return MaterialPageRoute(builder: (_) => PhotoDetailsPage());
       default:
         return MaterialPageRoute(
             builder: (_) => Scaffold(

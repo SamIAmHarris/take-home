@@ -2,8 +2,9 @@ import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:t3_demo/base/mvp.dart';
-import 'package:t3_demo/feature/photo_details/photo_detail_arguments.dart';
+import 'package:t3_demo/bloc/photo_bloc.dart';
 import 'package:t3_demo/feature/photos/photos_contract.dart';
 import 'package:t3_demo/feature/photos/photos_presenter.dart';
 import 'package:t3_demo/model/photo.dart';
@@ -53,14 +54,16 @@ class _PhotosPageState extends State<PhotosPage> implements PhotosView {
 
   @override
   Widget build(BuildContext context) {
+    final PhotoBloc photoBloc = Provider.of<PhotoBloc>(context);
+
     return Scaffold(
       appBar: _getAppBar(),
       key: _scaffoldKey,
-      body: _getMainContent(),
+      body: _getMainContent(photoBloc),
     );
   }
 
-  Widget _getMainContent() {
+  Widget _getMainContent(PhotoBloc photoBloc) {
     switch (screenState) {
       case ScreenState.LOADING:
         return T3Widget.STANDARD_PROGRESS;
@@ -74,7 +77,7 @@ class _PhotosPageState extends State<PhotosPage> implements PhotosView {
             controller: _scrollController,
             itemCount: photos.length,
             itemBuilder: (BuildContext context, int index) {
-              return _getPhotoCard(photos[index]);
+              return _getPhotoCard(photos[index], photoBloc);
             });
     }
   }
@@ -85,11 +88,11 @@ class _PhotosPageState extends State<PhotosPage> implements PhotosView {
         )
       : AppBar(title: Text(Strings.ALBUM_PHOTOS));
 
-  Widget _getPhotoCard(Photo photo) {
+  Widget _getPhotoCard(Photo photo, PhotoBloc photoBloc) {
     return Card(
       child: InkWell(
         onTap: () {
-          navigateToPhotoDetails(photo);
+          navigateToPhotoDetails(photo, photoBloc);
         },
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -143,9 +146,10 @@ class _PhotosPageState extends State<PhotosPage> implements PhotosView {
   }
 
   @override
-  void navigateToPhotoDetails(Photo photo) {
-    Navigator.of(context).pushNamed(T3Route.PHOTO_DETAILS,
-        arguments: PhotoDetailsArguments(photo));
+  void navigateToPhotoDetails(Photo photo, PhotoBloc photoBloc) {
+    photoBloc.photo = photo;
+
+    Navigator.of(context).pushNamed(T3Route.PHOTO_DETAILS);
   }
 
   @override

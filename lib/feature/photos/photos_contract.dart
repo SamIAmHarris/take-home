@@ -1,4 +1,5 @@
 import 'package:t3_demo/base/mvp.dart';
+import 'package:t3_demo/bloc/photo_bloc.dart';
 import 'package:t3_demo/model/photo.dart';
 
 abstract class PhotosPresenter implements BasePresenter {
@@ -18,5 +19,5 @@ abstract class PhotosView implements BaseView<PhotosPresenter> {
 
   void setPhotos(List<Photo> photos);
 
-  void navigateToPhotoDetails(Photo photo);
+  void navigateToPhotoDetails(Photo photo, PhotoBloc photoBloc);
 }
