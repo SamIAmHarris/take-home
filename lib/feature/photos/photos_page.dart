@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:t3_demo/base/mvp.dart';
 import 'package:t3_demo/feature/photo_details/photo_detail_arguments.dart';
+import 'package:t3_demo/feature/photos/photo_card.dart';
 import 'package:t3_demo/feature/photos/photos_contract.dart';
 import 'package:t3_demo/feature/photos/photos_presenter.dart';
 import 'package:t3_demo/model/photo.dart';
@@ -74,7 +75,8 @@ class _PhotosPageState extends State<PhotosPage> implements PhotosView {
             controller: _scrollController,
             itemCount: photos.length,
             itemBuilder: (BuildContext context, int index) {
-              return _getPhotoCard(photos[index]);
+              Photo photo = photos[index];
+              return PhotoCard(photo, () => navigateToPhotoDetails(photo));
             });
     }
   }
@@ -84,58 +86,6 @@ class _PhotosPageState extends State<PhotosPage> implements PhotosView {
           previousPageTitle: Strings.ALBUMS,
         )
       : AppBar(title: Text(Strings.ALBUM_PHOTOS));
-
-  Widget _getPhotoCard(Photo photo) {
-    return Card(
-      key: Key(photo.id.toString()),
-      child: InkWell(
-        onTap: () {
-          navigateToPhotoDetails(photo);
-        },
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            _getThumbnailWidget(photo),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.all(Num.STANDARD_PADDING),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    _getMetaDataText(
-                      photo.title,
-                    ),
-                    _getMetaDataText(
-                      "${Strings.ID} : ${photo.id}",
-                    ),
-                    _getMetaDataText(
-                      "${Strings.ALBUM_ID} : ${photo.albumId}",
-                    ),
-                  ],
-                ),
-              ),
-            )
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _getMetaDataText(String title) => Text(
-        title,
-        textAlign: TextAlign.center,
-      );
-
-  Widget _getThumbnailWidget(Photo photo) => SizedBox(
-        height: Num.THUMBNAIL_SIZE,
-        width: Num.THUMBNAIL_SIZE,
-        child: Center(
-          child: FadeInImage.memoryNetwork(
-            placeholder: kTransparentImage,
-            image: photo.thumbnailUrl,
-          ),
-        ),
-      );
 
   @override
   void showException(String exceptionMessage) {
