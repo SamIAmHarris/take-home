@@ -15,6 +15,7 @@ class AlbumCard extends StatelessWidget {
         child: Center(
             child: Text(
           albumTitle ?? Strings.DEFAULT_ALBUM_TITLE,
+          textDirection: TextDirection.ltr,
           style: Styles.kCardAlbumStyle,
           textAlign: TextAlign.center,
         )),
