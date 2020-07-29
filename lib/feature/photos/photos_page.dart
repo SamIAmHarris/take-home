@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:t3_demo/base/mvp.dart';
 import 'package:t3_demo/bloc/photo_bloc.dart';
+import 'package:t3_demo/feature/photos/photo_card.dart';
 import 'package:t3_demo/feature/photos/photos_contract.dart';
 import 'package:t3_demo/feature/photos/photos_presenter.dart';
 import 'package:t3_demo/model/photo.dart';
@@ -77,7 +78,13 @@ class _PhotosPageState extends State<PhotosPage> implements PhotosView {
             controller: _scrollController,
             itemCount: photos.length,
             itemBuilder: (BuildContext context, int index) {
-              return _getPhotoCard(photos[index], photoBloc);
+              Photo photo = photos[index];
+              return PhotoCard(
+                  photo: photo,
+                  onPressed: () {
+                    photoBloc.photo = photo;
+                    navigateToPhotoDetails(photo, photoBloc);
+                  });
             });
     }
   }
@@ -88,58 +95,6 @@ class _PhotosPageState extends State<PhotosPage> implements PhotosView {
         )
       : AppBar(title: Text(Strings.ALBUM_PHOTOS));
 
-  Widget _getPhotoCard(Photo photo, PhotoBloc photoBloc) {
-    return Card(
-      key: Key(photo.id.toString()),
-      child: InkWell(
-        onTap: () {
-          navigateToPhotoDetails(photo, photoBloc);
-        },
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            _getThumbnailWidget(photo),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.all(Num.STANDARD_PADDING),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    _getMetaDataText(
-                      photo.title,
-                    ),
-                    _getMetaDataText(
-                      "${Strings.ID} : ${photo.id}",
-                    ),
-                    _getMetaDataText(
-                      "${Strings.ALBUM_ID} : ${photo.albumId}",
-                    ),
-                  ],
-                ),
-              ),
-            )
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _getMetaDataText(String title) => Text(
-        title,
-        textAlign: TextAlign.center,
-      );
-
-  Widget _getThumbnailWidget(Photo photo) => SizedBox(
-        height: Num.THUMBNAIL_SIZE,
-        width: Num.THUMBNAIL_SIZE,
-        child: Center(
-          child: FadeInImage.memoryNetwork(
-            placeholder: kTransparentImage,
-            image: photo.thumbnailUrl,
-          ),
-        ),
-      );
-
   @override
   void showException(String exceptionMessage) {
     final snackBar = SnackBar(content: Text(exceptionMessage));
@@ -148,8 +103,6 @@ class _PhotosPageState extends State<PhotosPage> implements PhotosView {
 
   @override
   void navigateToPhotoDetails(Photo photo, PhotoBloc photoBloc) {
-    photoBloc.photo = photo;
-
     Navigator.of(context).pushNamed(T3Route.PHOTO_DETAILS);
   }
 

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:t3_demo/base/mvp.dart';
+import 'package:t3_demo/feature/albums/album_card.dart';
 import 'package:t3_demo/feature/albums/albums_contract.dart';
 import 'package:t3_demo/feature/albums/albums_presenter.dart';
 import 'package:t3_demo/feature/photos/photos_arguments.dart';
@@ -51,25 +52,15 @@ class _AlbumsPageState extends State<AlbumsPage> implements AlbumsView {
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: Num.PORTRAIT_ALBUM_COLUMN),
             itemBuilder: (BuildContext context, int index) {
-              return _getAlbumCard(albums[index]);
+              Album album = albums[index];
+              return AlbumCard(
+                albumTitle: album.title,
+                onPressed: () {
+                  navigateToPhotoDetailScreen(album.id);
+                },
+              );
             });
     }
-  }
-
-  Widget _getAlbumCard(Album album) {
-    return Card(
-      child: InkWell(
-        onTap: () {
-          navigateToPhotoDetailScreen(album.id);
-        },
-        child: Center(
-            child: Text(
-          album.title ?? Strings.DEFAULT_ALBUM_TITLE,
-          style: Styles.kCardAlbumStyle,
-          textAlign: TextAlign.center,
-        )),
-      ),
-    );
   }
 
   @override
