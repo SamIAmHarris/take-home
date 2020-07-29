@@ -5,59 +5,64 @@ import 'package:t3_demo/bloc/photo_bloc.dart';
 import 'package:t3_demo/model/photo.dart';
 import 'package:t3_demo/util/constants.dart';
 
-class PhotoDetailsPage extends StatefulWidget {
-  @override
-  _PhotoDetailsPageState createState() => _PhotoDetailsPageState();
-}
-
-class _PhotoDetailsPageState extends State<PhotoDetailsPage> {
-  Photo photo;
-
-  _PhotoDetailsPageState() {}
-
+class PhotoDetailsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final PhotoBloc photoBloc = Provider.of<PhotoBloc>(context);
-    this.photo = photoBloc.photo;
+    Photo photo = photoBloc.photo;
 
     return Scaffold(
-      body: _getMainContent(),
-    );
-  }
-
-  Widget _getMainContent() {
-    return Container(
-      child: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _getFullSizePhotoWidget(),
-            _getMetadataText(
-              padding: const EdgeInsets.fromLTRB(8.0, 16.0, 8.0, 2.0),
-              title: "${Strings.TITLE}: ${photo.title}",
-            ),
-            _getMetadataText(
+      body: Container(
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              FullSizePhotoWidget(photo.url),
+              MetaDataText(
+                padding: const EdgeInsets.fromLTRB(8.0, 16.0, 8.0, 2.0),
+                title: "${Strings.TITLE}: ${photo.title}",
+              ),
+              MetaDataText(
+                  padding: Styles.kStandardRowParams,
+                  title: "${Strings.ALBUM_ID}: ${photo.albumId}"),
+              MetaDataText(
                 padding: Styles.kStandardRowParams,
-                title: "${Strings.ALBUM_ID}: ${photo.albumId}"),
-            _getMetadataText(
-              padding: Styles.kStandardRowParams,
-              title: "${Strings.ID}: ${photo.id}",
-            )
-          ],
+                title: "${Strings.ID}: ${photo.id}",
+              )
+            ],
+          ),
         ),
       ),
     );
   }
+}
 
-  Widget _getFullSizePhotoWidget() => SizedBox(
-        child: Center(
-          child: FadeInImage.assetNetwork(
-            placeholder: Asset.PLACEHOLDER_LOCATION,
-            image: photo.url,
-          ),
+class MetaDataText extends StatelessWidget {
+  final String title;
+  final EdgeInsets padding;
+
+  MetaDataText({this.title, this.padding});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(padding: padding, child: Text(title));
+  }
+}
+
+class FullSizePhotoWidget extends StatelessWidget {
+  final String url;
+
+  FullSizePhotoWidget(this.url);
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      child: Center(
+        child: FadeInImage.assetNetwork(
+          placeholder: Asset.PLACEHOLDER_LOCATION,
+          image: url,
         ),
-      );
-
-  Widget _getMetadataText({String title, EdgeInsets padding}) =>
-      Padding(padding: padding, child: Text(title));
+      ),
+    );
+  }
 }
