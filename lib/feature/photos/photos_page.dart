@@ -87,6 +87,7 @@ class _PhotosPageState extends State<PhotosPage> implements PhotosView {
 
   Widget _getPhotoCard(Photo photo) {
     return Card(
+      key: Key(photo.id.toString()),
       child: InkWell(
         onTap: () {
           navigateToPhotoDetails(photo);

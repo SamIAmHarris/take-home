@@ -44,7 +44,7 @@ class PhotosPresenterImpl implements PhotosPresenter {
 
   @override
   Future<void> retrieveMorePhotos() async {
-    if (currentPage >= Num.MAX_PHOTOS_PER_ALBUM) {
+    if (currentPage >= Num.MAX_PHOTOS_PER_ALBUM - 1) {
       return;
     }
 
